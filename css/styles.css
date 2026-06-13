@@ -70,6 +70,13 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 /* ----- Map canvas ----- */
 #map { position: fixed; inset: 0; z-index: 0; background: var(--map-bg); }
 .maplibregl-ctrl-attrib { font-size: 10px; }
+#map-notice {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  max-width: 360px; text-align: center; z-index: 1;
+  padding: 14px 18px; font-size: 13px; color: var(--ink-soft);
+  background: var(--panel-bg); border: 1px solid var(--panel-border);
+  border-radius: 12px; box-shadow: var(--shadow);
+}
 
 /* ----- Top bar ----- */
 .topbar {

@@ -401,10 +401,28 @@ function wireMapControls() {
   });
 }
 
+// Show a non-blocking notice over the map area (used when the map can't load).
+function showMapNotice(msg) {
+  let n = document.getElementById("map-notice");
+  if (!n) {
+    n = el("div", null);
+    n.id = "map-notice";
+    document.getElementById("map").appendChild(n);
+  }
+  n.textContent = msg;
+}
+
 // ===========================================================================
 // Boot
 // ===========================================================================
 function init() {
+  // Surface unexpected errors instead of failing silently to a blank page.
+  window.addEventListener("error", (e) => {
+    if (/maplibre|map/i.test(String(e.message))) {
+      showMapNotice("Map failed to load — the dashboard still works. " + e.message);
+    }
+  });
+
   // Restore saved edition.
   let saved = DEFAULT_THEME;
   try { saved = localStorage.getItem("waves-theme") || DEFAULT_THEME; } catch {}
@@ -412,13 +430,14 @@ function init() {
   currentTheme = saved;
   document.body.className = `theme-${saved}`;
 
+  // UI first — these never depend on the map, so the controls and dashboard
+  // appear even if the map library or tiles fail.
   renderThemeNav();
   renderBeachPicker();
   for (const b of document.querySelectorAll(".edition")) {
     b.classList.toggle("active", b.dataset.theme === saved);
   }
-
-  const m = initMap(THEMES[saved].map, selectBeachById);
+  renderFlags();
 
   $("#beach-select").addEventListener("change", (e) => selectBeachById(e.target.value));
   $("#refresh-btn").addEventListener("click", () => activeBeach && loadBeach(activeBeach, { fly: false }));
@@ -426,11 +445,19 @@ function init() {
   $("#panel-toggle").addEventListener("click", togglePanel);
   wireMapControls();
 
-  // Tint markers by rip risk once the map has placed them.
-  m.on("load", colorMarkersByRisk);
+  // The map is best-effort: a failure here must not take down the dashboard.
+  try {
+    if (typeof maplibregl === "undefined") throw new Error("MapLibre library did not load (check network / blockers).");
+    const m = initMap(THEMES[saved].map, selectBeachById);
+    m.on("load", colorMarkersByRisk);
+    m.on("error", (ev) => console.warn("map error:", ev?.error?.message || ev));
+  } catch (err) {
+    console.error(err);
+    showMapNotice("Map failed to load — the dashboard still works. " + err.message);
+  }
 
-  // Default beach.
-  loadBeach(BEACHES[0]);
+  // Always load the dashboard data, with or without a map.
+  loadBeach(BEACHES[0], { fly: true });
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -380,10 +380,14 @@ function useMyLocation() {
   );
 }
 
-function togglePanel() {
-  const collapsed = document.body.classList.toggle("panel-collapsed");
+function setPanel(collapsed) {
+  document.body.classList.toggle("panel-collapsed", collapsed);
   $("#panel-toggle").textContent = collapsed ? "‹" : "›";
+  $("#panel-btn").setAttribute("aria-pressed", String(!collapsed));
   setTimeout(resizeMap, 320);
+}
+function togglePanel() {
+  setPanel(!document.body.classList.contains("panel-collapsed"));
 }
 
 // Lazily fetch alert shapes for the active beach's state when the overlay is on.
@@ -443,7 +447,12 @@ function init() {
   $("#refresh-btn").addEventListener("click", () => activeBeach && loadBeach(activeBeach, { fly: false }));
   $("#geo-btn").addEventListener("click", useMyLocation);
   $("#panel-toggle").addEventListener("click", togglePanel);
+  $("#panel-btn").addEventListener("click", togglePanel);
   wireMapControls();
+
+  // Lead with the map on small screens; show the dashboard by default on
+  // larger ones where there's room beside it.
+  setPanel(window.matchMedia("(max-width: 820px)").matches);
 
   // The map is best-effort: a failure here must not take down the dashboard.
   try {

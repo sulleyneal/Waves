@@ -301,7 +301,11 @@ body.panel-collapsed .panel { transform: translateX(110%); opacity: 0; pointer-e
 /* ----- Responsive ----- */
 @media (max-width: 820px) {
   .editions { order: 3; width: 100%; justify-content: flex-start; }
-  .panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 56vh; }
-  .panel-toggle { display: none; }
-  select#beach-select { max-width: 40vw; }
+  .panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 62vh; }
+  /* Bottom sheet slides down when collapsed (not sideways). */
+  body.panel-collapsed .panel { transform: translateY(110%); }
+  .panel-toggle { display: none; }     /* the topbar "Details" button drives this on mobile */
+  .map-controls { top: auto; bottom: 12px; left: 12px; z-index: 19; }
+  select#beach-select { max-width: 34vw; }
+  #panel-btn { font-size: 13px; padding: 8px 9px; }
 }

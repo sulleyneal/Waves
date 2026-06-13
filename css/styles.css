@@ -1,0 +1,255 @@
+/* Waves — Gulf Coast Beach Safety */
+
+:root {
+  --bg-top: #06203a;
+  --bg-bot: #0a3b5c;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-solid: #0e2d47;
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #eaf4ff;
+  --muted: #9fb8cf;
+  --accent: #38bdf8;
+  --sand: #f4e3c1;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: linear-gradient(160deg, var(--bg-top), var(--bg-bot) 55%, #0e4a6b);
+  background-attachment: fixed;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* --- Top bar --- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(6, 32, 58, 0.82);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 30px; }
+.brand h1 { font-size: 22px; letter-spacing: 0.5px; }
+.tagline { color: var(--muted); font-size: 13px; }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+select#beach-select {
+  background: var(--card-solid);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  max-width: 60vw;
+}
+.ghost-btn {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ghost-btn:hover { background: rgba(255, 255, 255, 0.14); }
+.ghost-btn:disabled { opacity: 0.5; cursor: wait; }
+
+/* --- Layout --- */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 4px 0;
+}
+.hero h2 { font-size: 30px; }
+.updated { font-size: 13px; white-space: nowrap; }
+
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* --- Cards --- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card-head h3 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
+
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+#dashboard.loading { opacity: 0.55; pointer-events: none; transition: opacity 0.2s; }
+
+/* --- Badges --- */
+.badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+.badge-official { background: #16a34a; color: #fff; }
+.badge-est { background: rgba(255, 255, 255, 0.14); color: var(--muted); }
+
+/* --- Rip current card --- */
+.rip { border-top: 4px solid #16a34a; }
+.rip[data-level="MODERATE"] { border-top-color: #f97316; }
+.rip[data-level="HIGH"] { border-top-color: #dc2626; }
+.rip-level { font-size: 38px; font-weight: 800; letter-spacing: 0.5px; }
+.rip[data-level="LOW"] .rip-level { color: #4ade80; }
+.rip[data-level="MODERATE"] .rip-level { color: #fb923c; }
+.rip[data-level="HIGH"] .rip-level { color: #f87171; }
+.rip-meter {
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  margin: 10px 0 12px;
+}
+.rip-meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4ade80, #facc15, #f87171);
+  transition: width 0.4s ease;
+}
+.howto { margin-top: 12px; }
+.howto summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+.howto ul { margin: 10px 0 0 18px; font-size: 14px; }
+.howto li { margin-bottom: 5px; }
+
+/* --- Alerts --- */
+.alerts-scroll { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.alert {
+  background: rgba(0, 0, 0, 0.18);
+  border-left: 4px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.alert-title { font-weight: 700; }
+.alert-headline { font-size: 13px; margin-top: 3px; }
+.alert-desc { font-size: 12px; color: var(--muted); margin-top: 6px; max-height: 90px; overflow: hidden; }
+.alert-meta { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* --- Stat grids --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+}
+.stat-grid-2 { grid-template-columns: 1fr 1fr; }
+.stat {
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-val { font-size: 26px; font-weight: 700; }
+.stat-key { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-top: 2px; }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* --- UV --- */
+.uv-body { display: flex; align-items: center; gap: 16px; }
+.uv-val { font-size: 48px; font-weight: 800; line-height: 1; }
+.uv-label { font-size: 18px; font-weight: 700; }
+
+/* --- Sun --- */
+.sun-body { display: flex; gap: 24px; }
+.sun-item { display: flex; flex-direction: column; gap: 2px; }
+.sun-item strong { font-size: 22px; }
+
+/* --- Tides --- */
+.tides { display: flex; flex-direction: column; gap: 8px; }
+.tide-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 10px;
+}
+.tide-type { font-weight: 600; }
+.tide-time { color: var(--text); }
+.tide-ht { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* --- Forecast --- */
+.forecast { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.fc-day {
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 12px;
+  padding: 12px 6px;
+  text-align: center;
+}
+.fc-name { font-size: 12px; color: var(--muted); text-transform: uppercase; }
+.fc-emoji { font-size: 26px; margin: 6px 0; }
+.fc-temp { font-size: 13px; font-weight: 600; }
+.fc-pop { font-size: 11px; color: var(--accent); margin-top: 4px; }
+
+/* --- Flags --- */
+.flags { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.flag-row { display: flex; gap: 12px; align-items: flex-start; }
+.flag-sw { width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.3); margin-top: 2px; }
+.flag-name { font-weight: 600; font-size: 14px; }
+.flag-detail { font-size: 12px; color: var(--muted); }
+
+/* --- Tips --- */
+.tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.tip { background: rgba(0, 0, 0, 0.16); border-radius: 12px; padding: 14px; }
+.tip h4 { font-size: 14px; margin-bottom: 5px; }
+.tip p { font-size: 13px; color: var(--muted); }
+
+/* --- Footer --- */
+.foot {
+  max-width: 1080px;
+  margin: 20px auto 40px;
+  padding: 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.foot p { margin-bottom: 6px; }
+
+/* --- Responsive --- */
+@media (max-width: 760px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .flags { grid-template-columns: 1fr; }
+  .hero h2 { font-size: 24px; }
+  .forecast { grid-template-columns: repeat(5, 1fr); }
+  select#beach-select { max-width: 48vw; }
+}

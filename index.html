@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06203a" />
+  <meta name="description" content="Beach safety dashboard for the Gulf Coast — rip current risk, NWS warnings, surf, tides, UV, and water temperature." />
+  <title>Waves · Gulf Coast Beach Safety</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🌊</span>
+      <div>
+        <h1>Waves</h1>
+        <span class="tagline">Gulf Coast beach safety</span>
+      </div>
+    </div>
+    <div class="controls">
+      <select id="beach-select" aria-label="Choose a beach"></select>
+      <button id="geo-btn" class="ghost-btn">📍 Near me</button>
+      <button id="refresh-btn" class="ghost-btn" title="Refresh">↻</button>
+    </div>
+  </header>
+
+  <main id="dashboard">
+    <section class="hero">
+      <div>
+        <h2 id="beach-name">—</h2>
+        <p id="beach-sub" class="muted"></p>
+      </div>
+      <span id="updated" class="muted updated"></span>
+    </section>
+
+    <!-- Top safety row: rip current + warnings -->
+    <div class="grid grid-2 safety-row">
+      <section id="rip-card" class="card rip" data-level="LOW">
+        <div class="card-head">
+          <h3>🌀 Rip Current Risk</h3>
+          <span id="rip-badge" class="badge">—</span>
+        </div>
+        <div class="rip-level" id="rip-level">—</div>
+        <div class="rip-meter"><div id="rip-meter-fill" class="rip-meter-fill"></div></div>
+        <p id="rip-note" class="muted small"></p>
+        <details class="howto">
+          <summary>Caught in a rip current?</summary>
+          <ul>
+            <li><strong>Don't fight it.</strong> You can't out-swim a rip.</li>
+            <li><strong>Stay calm and float</strong> to keep your head above water.</li>
+            <li><strong>Swim parallel</strong> to the shore to escape the current, then angle back in.</li>
+            <li><strong>Can't escape?</strong> Float, wave, and yell for help.</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="card alerts-card">
+        <div class="card-head">
+          <h3>⚠️ Weather Warnings</h3>
+          <span id="alerts-heading" class="badge badge-est">—</span>
+        </div>
+        <div id="alerts" class="alerts-scroll"></div>
+      </section>
+    </div>
+
+    <!-- Current conditions -->
+    <section class="card">
+      <div class="card-head"><h3>Current conditions</h3></div>
+      <div id="conditions-grid" class="stat-grid"></div>
+    </section>
+
+    <!-- Surf + UV + Sun -->
+    <div class="grid grid-3">
+      <section class="card">
+        <div class="card-head"><h3>🏄 Surf</h3></div>
+        <div id="surf-grid" class="stat-grid stat-grid-2"></div>
+      </section>
+
+      <section class="card uv-card">
+        <div class="card-head"><h3>☀️ UV Index</h3></div>
+        <div class="uv-body">
+          <div id="uv-val" class="uv-val">—</div>
+          <div>
+            <div id="uv-label" class="uv-label">—</div>
+            <div id="uv-advice" class="muted small"></div>
+            <div id="uv-max" class="muted small"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card sun-card">
+        <div class="card-head"><h3>🌅 Sun</h3></div>
+        <div class="sun-body">
+          <div class="sun-item"><span class="muted">Sunrise</span><strong id="sunrise">—</strong></div>
+          <div class="sun-item"><span class="muted">Sunset</span><strong id="sunset">—</strong></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tides + forecast -->
+    <div class="grid grid-2">
+      <section class="card">
+        <div class="card-head"><h3>🌊 Tides</h3></div>
+        <div id="tides-list" class="tides"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h3>📅 5-Day Outlook</h3></div>
+        <div id="forecast" class="forecast"></div>
+      </section>
+    </div>
+
+    <!-- Beach flag legend -->
+    <section class="card">
+      <div class="card-head"><h3>🚩 Beach Flag Warning System</h3></div>
+      <div id="flags" class="flags"></div>
+    </section>
+
+    <!-- Marine life / general safety tips -->
+    <section class="card">
+      <div class="card-head"><h3>🐚 Good to know on the Gulf</h3></div>
+      <div class="tips">
+        <div class="tip"><h4>⚡ Lightning</h4><p>If you hear thunder, you're close enough to be struck. Leave the water and get indoors. Wait 30 minutes after the last thunder before returning.</p></div>
+        <div class="tip"><h4>🪼 Jellyfish &amp; Man o' War</h4><p>Common in warm Gulf water, especially with onshore winds. Rinse stings with vinegar or seawater (not fresh water), remove tentacles, and seek help for severe reactions.</p></div>
+        <div class="tip"><h4>🦈 Stingrays</h4><p>They rest in shallow sand. Do the "stingray shuffle" — slide your feet rather than stepping down — to scare them off.</p></div>
+        <div class="tip"><h4>🌡️ Heat &amp; hydration</h4><p>Gulf humidity makes heat feel worse. Drink water often, take shade breaks, and watch kids and older adults for heat exhaustion.</p></div>
+        <div class="tip"><h4>🩴 Hot sand &amp; sun</h4><p>Reapply reef-safe SPF every 2 hours and after swimming. Sand can burn bare feet by midday.</p></div>
+        <div class="tip"><h4>🚩 Swim near lifeguards</h4><p>Most drownings happen on unguarded beaches. Know the flag color before you get in, and never swim alone.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Data: Open-Meteo (weather &amp; surf), NOAA Tides &amp; Currents (tides &amp; water temp), NWS api.weather.gov (official alerts). Rip current risk is an estimate unless marked <strong>NWS OFFICIAL</strong>.</p>
+    <p class="muted small">Waves is an informational aid, not a substitute for lifeguards or official guidance. When in doubt, don't go out.</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

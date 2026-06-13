@@ -108,15 +108,18 @@ export function resizeMap() { map && map.resize(); }
 // Radar overlay (RainViewer animated loop)
 // ---------------------------------------------------------------------------
 function radarTileURL(frame) {
-  // color 4 = "The Weather Channel"; 1_1 = smooth + show snow.
-  return `${overlay.radarHost}${frame.path}/256/{z}/{x}/{y}/4/1_1.png`;
+  // 512px tiles, color 4 = "The Weather Channel", 1_1 = smooth + show snow.
+  return `${overlay.radarHost}${frame.path}/512/{z}/{x}/{y}/4/1_1.png`;
 }
 
 function addRadarToMap() {
   if (!map || !overlay.radarFrames.length) return;
   const frame = overlay.radarFrames[overlay.radarIdx] || overlay.radarFrames[overlay.radarFrames.length - 1];
   if (!map.getSource("radar")) {
-    map.addSource("radar", { type: "raster", tiles: [radarTileURL(frame)], tileSize: 256 });
+    // RainViewer's free tiles top out at zoom 7; cap the source there and let
+    // MapLibre overzoom (stretch) at closer zooms instead of requesting tiles
+    // the server rejects with a "Zoom Level Not Supported" placeholder.
+    map.addSource("radar", { type: "raster", tiles: [radarTileURL(frame)], tileSize: 512, maxzoom: 7 });
   }
   if (!map.getLayer("radar-layer")) {
     const before = map.getLayer("place-labels") ? "place-labels" : undefined;

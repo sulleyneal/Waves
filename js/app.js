@@ -476,3 +476,11 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+// Register the service worker so the app is installable and opens offline.
+// Resolved relative to the page, so it works under a project Pages subpath.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch((e) => console.warn("SW registration failed:", e));
+  });
+}

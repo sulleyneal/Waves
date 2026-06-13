@@ -58,7 +58,10 @@ function addBeachMarkers() {
     el.className = "beach-marker";
     el.type = "button";
     el.setAttribute("aria-label", `${b.name}, ${b.state}`);
-    el.innerHTML = `<span class="bm-dot"></span><span class="bm-label">${b.name}</span>`;
+    el.innerHTML =
+      `<span class="bm-flag" aria-hidden="true"></span>` +
+      `<span class="bm-dot"></span>` +
+      `<span class="bm-label">${b.name}</span>`;
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       onSelect && onSelect(b.id);

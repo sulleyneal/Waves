@@ -307,10 +307,16 @@ function renderUpdated() {
 // ===========================================================================
 // Theme handling
 // ===========================================================================
+// Swap only the theme class so other body state (e.g. panel-collapsed) sticks.
+function applyThemeClass(key) {
+  for (const k of Object.keys(THEMES)) document.body.classList.remove(`theme-${k}`);
+  document.body.classList.add(`theme-${key}`);
+}
+
 function setTheme(key) {
   if (!THEMES[key]) return;
   currentTheme = key;
-  document.body.className = `theme-${key}`;
+  applyThemeClass(key);
   for (const b of document.querySelectorAll(".edition")) {
     b.classList.toggle("active", b.dataset.theme === key);
   }
@@ -432,7 +438,7 @@ function init() {
   try { saved = localStorage.getItem("waves-theme") || DEFAULT_THEME; } catch {}
   if (!THEMES[saved]) saved = DEFAULT_THEME;
   currentTheme = saved;
-  document.body.className = `theme-${saved}`;
+  applyThemeClass(saved);
 
   // UI first — these never depend on the map, so the controls and dashboard
   // appear even if the map library or tiles fail.

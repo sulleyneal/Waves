@@ -14,16 +14,6 @@ body.theme-antique {
   --font-body:'EB Garamond', Georgia, serif;
   --shadow:0 10px 30px rgba(60,45,20,.28);
 }
-body.theme-midnight {
-  --bg:#0b0d10; --map-bg:#0e1114;
-  --panel-bg:rgba(17,20,26,.82); --panel-border:rgba(255,255,255,.10);
-  --ink:#e5eaf0; --ink-soft:#8b97a5; --ink-faint:#5e6b7a; --accent:#38bdf8;
-  --rain:#38bdf8; --pop-bg:rgba(17,20,26,.9); --pop-border:rgba(255,255,255,.12);
-  --card-bg:rgba(255,255,255,.05); --card-line:rgba(255,255,255,.08);
-  --font-display:'Space Grotesk', sans-serif;
-  --font-body:'Inter', system-ui, sans-serif;
-  --shadow:0 12px 34px rgba(0,0,0,.45);
-}
 body.theme-hydro {
   --bg:#06080d; --map-bg:#070a10;
   --panel-bg:rgba(9,13,19,.85); --panel-border:rgba(120,190,235,.18);
@@ -267,6 +257,7 @@ body.panel-collapsed .panel { transform: translateX(110%); opacity: 0; pointer-e
   background: transparent; border: none; cursor: pointer; padding: 0;
   transform: translateY(0); transition: transform .15s;
 }
+/* Location pin — stays in the edition accent so the risk flag reads clearly. */
 .beach-marker .bm-dot {
   width: 14px; height: 14px; border-radius: 50%;
   background: var(--accent);
@@ -274,10 +265,23 @@ body.panel-collapsed .panel { transform: translateX(110%); opacity: 0; pointer-e
   box-shadow: 0 0 0 2px rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.4);
   transition: background .25s;
 }
-/* Tinted by current rip-current risk. */
-.beach-marker[data-risk="LOW"] .bm-dot { background: #16a34a; }
-.beach-marker[data-risk="MODERATE"] .bm-dot { background: #ea580c; }
-.beach-marker[data-risk="HIGH"] .bm-dot { background: #dc2626; }
+/* Riptide flag — a separate banner colored by rip-current risk, always shown. */
+.beach-marker .bm-flag {
+  position: relative; width: 12px; height: 16px; flex: none;
+}
+.beach-marker .bm-flag::before {        /* pole */
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: #fff; border-radius: 1px; box-shadow: 0 0 2px rgba(0,0,0,.7);
+}
+.beach-marker .bm-flag::after {         /* banner */
+  content: ""; position: absolute; left: 2px; top: 0; width: 10px; height: 8px;
+  background: var(--rc, #9aa0a6);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 0 100%);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.55));
+}
+.beach-marker[data-risk="LOW"]      { --rc: #16a34a; }
+.beach-marker[data-risk="MODERATE"] { --rc: #ea580c; }
+.beach-marker[data-risk="HIGH"]     { --rc: #dc2626; }
 .beach-marker .bm-label {
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
   color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.8);

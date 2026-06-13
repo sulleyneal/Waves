@@ -67,13 +67,6 @@ export const THEMES = {
            shadow:"#8a7a57", highlight:"#fbf3dc",
            sky:"#d9c9a3", horizon:"#e9dcbe", fog:"#efe5cd", exaggeration:1.3 },
   },
-  midnight: {
-    label: "Midnight", serif: false,
-    map: { bg:"#0e1114", water:"#16303f", coast:"#2e5a72", road:"#4a5364",
-           land:"#141a20", sand:"#1c2530", label:"#dde4ec", halo:"#0b0d10",
-           shadow:"#05080b", highlight:"#2a3a48",
-           sky:"#0a1820", horizon:"#16303f", fog:"#0e1114", exaggeration:1.4 },
-  },
   hydro: {
     label: "Hydro", serif: false,
     map: { bg:"#070a10", water:"#0e85c8", coast:"#56c4f2", road:"#242f3c",

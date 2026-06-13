@@ -5,8 +5,14 @@
 // independently so a single outage never blanks the page.
 
 import { BEACHES, BEACH_FLAGS, THEMES, DEFAULT_THEME } from "./config.js";
-import { fetchWeather, fetchMarine, fetchTides, fetchWaterTemp, fetchAlerts } from "./api.js";
-import { initMap, setActiveBeach, flyToBeach, applyMapTheme, resizeMap } from "./map.js";
+import {
+  fetchWeather, fetchMarine, fetchTides, fetchWaterTemp, fetchAlerts,
+  fetchBatchConditions, fetchAlertShapes,
+} from "./api.js";
+import {
+  initMap, setActiveBeach, setMarkerRisk, flyToBeach, applyMapTheme, resizeMap,
+  toggleRadar, toggleAlerts, setAlertData,
+} from "./map.js";
 
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, cls, html) => {
@@ -34,6 +40,27 @@ const COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW",
 const degToCompass = (d) => (d == null ? "—" : COMPASS[Math.round(d / 22.5) % 16]);
 
 // --- Rip current risk -------------------------------------------------------
+// Shared heuristic: longer-period, taller surf and stronger onshore wind raise
+// the score. Used both for the selected-beach panel and the marker tints.
+function ripScore({ waveFt, period, windMph, highSurf }) {
+  let score = 0;
+  if (waveFt != null) {
+    if (waveFt >= 4) score += 3;
+    else if (waveFt >= 2.5) score += 2;
+    else if (waveFt >= 1.5) score += 1;
+  }
+  if (period != null && period >= 8) score += 1;
+  if ((windMph ?? 0) >= 20) score += 2;
+  else if ((windMph ?? 0) >= 13) score += 1;
+  if (highSurf) score += 2;
+  return score;
+}
+function levelFromScore(score) {
+  if (score >= 5) return "HIGH";
+  if (score >= 3) return "MODERATE";
+  return "LOW";
+}
+
 function ripCurrentRisk(alerts, marine, weather) {
   const official = alerts.find((a) => /rip current/i.test(a.event || ""));
   if (official) return { level: "HIGH", label: "High", official: true, note: official.headline };
@@ -43,27 +70,24 @@ function ripCurrentRisk(alerts, marine, weather) {
   const period = marine?.current?.wave_period ?? null;
   const windMph = weather?.current?.wind_speed_10m ?? 0;
 
-  let score = 0;
-  if (waveFt != null) {
-    if (waveFt >= 4) score += 3;
-    else if (waveFt >= 2.5) score += 2;
-    else if (waveFt >= 1.5) score += 1;
-  }
-  if (period != null && period >= 8) score += 1;
-  if (windMph >= 20) score += 2;
-  else if (windMph >= 13) score += 1;
-  if (highSurf) score += 2;
-
-  let level = "LOW", label = "Low";
-  if (score >= 5) { level = "HIGH"; label = "High"; }
-  else if (score >= 3) { level = "MODERATE"; label = "Moderate"; }
-
+  const level = levelFromScore(ripScore({ waveFt, period, windMph, highSurf }));
+  const label = { LOW: "Low", MODERATE: "Moderate", HIGH: "High" }[level];
   return {
     level, label, official: false,
     note: waveFt == null
       ? "Estimated from wind (surf data unavailable for this spot)."
       : "Estimated from surf height, swell period, and wind. Not an official NWS forecast.",
   };
+}
+
+// Color every marker by its current rip risk (one batched fetch for all beaches).
+async function colorMarkersByRisk() {
+  try {
+    const rows = await fetchBatchConditions(BEACHES);
+    for (const r of rows) {
+      setMarkerRisk(r.id, levelFromScore(ripScore(r)));
+    }
+  } catch { /* markers keep their accent color */ }
 }
 
 function uvAdvice(uv) {
@@ -325,6 +349,10 @@ async function loadBeach(beach, { fly = true } = {}) {
   renderForecast(weather);
   renderUpdated();
   setLoading(false);
+
+  // Keep this beach's marker tint and (if shown) the alert overlay in sync.
+  setMarkerRisk(beach.id, risk.level);
+  refreshAlertShapes();
 }
 
 function selectBeachById(id) {
@@ -358,6 +386,21 @@ function togglePanel() {
   setTimeout(resizeMap, 320);
 }
 
+// Lazily fetch alert shapes for the active beach's state when the overlay is on.
+async function refreshAlertShapes() {
+  if (!$("#alerts-toggle").checked || !activeBeach) return;
+  const features = await fetchAlertShapes(activeBeach.state);
+  setAlertData(features);
+}
+
+function wireMapControls() {
+  $("#radar-toggle").addEventListener("change", (e) => toggleRadar(e.target.checked));
+  $("#alerts-toggle").addEventListener("change", async (e) => {
+    if (e.target.checked) await refreshAlertShapes();
+    toggleAlerts(e.target.checked);
+  });
+}
+
 // ===========================================================================
 // Boot
 // ===========================================================================
@@ -375,12 +418,16 @@ function init() {
     b.classList.toggle("active", b.dataset.theme === saved);
   }
 
-  initMap(THEMES[saved].map, selectBeachById);
+  const m = initMap(THEMES[saved].map, selectBeachById);
 
   $("#beach-select").addEventListener("change", (e) => selectBeachById(e.target.value));
   $("#refresh-btn").addEventListener("click", () => activeBeach && loadBeach(activeBeach, { fly: false }));
   $("#geo-btn").addEventListener("click", useMyLocation);
   $("#panel-toggle").addEventListener("click", togglePanel);
+  wireMapControls();
+
+  // Tint markers by rip risk once the map has placed them.
+  m.on("load", colorMarkersByRisk);
 
   // Default beach.
   loadBeach(BEACHES[0]);

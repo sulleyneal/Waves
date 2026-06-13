@@ -35,6 +35,7 @@ export const API = {
   marine: "https://marine-api.open-meteo.com/v1/marine",
   tides: "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
   nwsAlerts: "https://api.weather.gov/alerts/active",
+  radarIndex: "https://api.rainviewer.com/public/weather-maps.json",
 };
 
 // ---------------------------------------------------------------------------

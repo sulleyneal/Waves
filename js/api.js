@@ -11,6 +11,54 @@ async function getJSON(url, { headers } = {}) {
   return res.json();
 }
 
+// --- Batched conditions for marker coloring --------------------------------
+// One forecast call + one marine call covering every beach (Open-Meteo accepts
+// comma-separated coordinates and returns an array). Used to tint markers by
+// rip-current risk without 11 separate round-trips.
+export async function fetchBatchConditions(beaches) {
+  const lats = beaches.map((b) => b.lat).join(",");
+  const lons = beaches.map((b) => b.lon).join(",");
+
+  const fParams = new URLSearchParams({
+    latitude: lats, longitude: lons,
+    current: "wind_speed_10m", wind_speed_unit: "mph", timezone: "auto",
+  });
+  const mParams = new URLSearchParams({
+    latitude: lats, longitude: lons,
+    current: "wave_height,wave_period", length_unit: "imperial", timezone: "auto",
+  });
+
+  const [wind, waves] = await Promise.all([
+    getJSON(`${API.forecast}?${fParams}`).catch(() => null),
+    getJSON(`${API.marine}?${mParams}`).catch(() => null),
+  ]);
+
+  // Normalize: single-location responses are objects, multi are arrays.
+  const asArr = (x) => (Array.isArray(x) ? x : x ? [x] : []);
+  const w = asArr(wind), m = asArr(waves);
+
+  return beaches.map((b, i) => ({
+    id: b.id,
+    windMph: w[i]?.current?.wind_speed_10m ?? null,
+    waveFt: m[i]?.current?.wave_height ?? null,
+    period: m[i]?.current?.wave_period ?? null,
+  }));
+}
+
+// --- NWS alert geometries (for map polygons) -------------------------------
+// Active alerts for a state, keeping only those that carry a drawable shape.
+export async function fetchAlertShapes(stateAbbr) {
+  const params = new URLSearchParams({ area: stateAbbr, status: "actual" });
+  try {
+    const data = await getJSON(`${API.nwsAlerts}?${params}`, {
+      headers: { Accept: "application/geo+json" },
+    });
+    return (data.features || []).filter((f) => f.geometry);
+  } catch {
+    return [];
+  }
+}
+
 // --- Open-Meteo: weather, UV, sun times ------------------------------------
 
 export async function fetchWeather(lat, lon) {
